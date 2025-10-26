@@ -12,11 +12,11 @@ import os
 
 load_dotenv()
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-ALGORITHM = os.getenv("JWT_ALGORITHM")
-ACCESS_TOKEN_EXPIRY_MINUTES = os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-default-secret-key-change-this-in-production-minimum-32-chars")
+ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRY_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__rounds=12)
 
 security = HTTPBearer()
 
