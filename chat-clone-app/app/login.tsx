@@ -250,7 +250,7 @@ export default function LoginScreen() {
               style={styles.loginButtonWrapper}
             >
               <LinearGradient
-                colors={['#3b82f6', '#8b5cf6']}
+                colors={['#22c55e', '#22c55e']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.loginButton}
@@ -261,21 +261,6 @@ export default function LoginScreen() {
                   <Text style={styles.loginButtonText}>{isSignupMode ? 'Sign Up' : 'Login'}</Text>
                 )}
               </LinearGradient>
-            </TouchableOpacity>
-          </View>
-
-          {/* Footer Links */}
-          <View style={styles.footer}>
-            <TouchableOpacity>
-              <Text style={styles.footerLink}>Help</Text>
-            </TouchableOpacity>
-            <Text style={styles.footerSeparator}>  </Text>
-            <TouchableOpacity>
-              <Text style={styles.footerLink}>Terms</Text>
-            </TouchableOpacity>
-            <Text style={styles.footerSeparator}>  </Text>
-            <TouchableOpacity>
-              <Text style={styles.footerLink}>Privacy</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -415,18 +400,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  footerLink: {
-    color: '#fff',
-    fontSize: 14,
-  },
-  footerSeparator: {
-    color: '#fff',
   },
 });
 
