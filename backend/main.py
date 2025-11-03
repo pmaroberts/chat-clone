@@ -18,7 +18,7 @@ app.add_middleware(
 
 @app.post("/auth/login", response_model=Token)
 async def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == user_credentials.username).first()
+    user = db.query(User).filter(User.email == user_credentials.email).first()
     
     if not user or not verify_password(user_credentials.password, user.hashed_password):
         raise HTTPException(
@@ -44,11 +44,11 @@ async def get_user(user_id: str, db: Session = Depends(get_db)):
 
 @app.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    existing_user = db.query(User).filter(User.username == user.username).first()
+    existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already registered"
+            detail="Email already registered"
         )
 
     existing_email = db.query(User).filter(User.email == user.email).first()
@@ -61,7 +61,6 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     hashed_password = get_password_hash(user.password)
 
     db_user = User(
-        username=user.username, 
         email=user.email,
         hashed_password=hashed_password
     )
