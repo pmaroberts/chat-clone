@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const WS_BASE_URL = 'ws://192.168.86.23:8000'; // Match your API_BASE_URL
+const WS_BASE_URL = process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:8000';
 
 interface PendingMessage {
   id: string;
@@ -11,7 +11,7 @@ interface PendingMessage {
   retries: number;
   resolve: (messageId: string) => void;
   reject: (error: Error) => void;
-  timeoutId?: NodeJS.Timeout;
+  timeoutId?: ReturnType<typeof setTimeout>;
 }
 
 interface WebSocketMessage {

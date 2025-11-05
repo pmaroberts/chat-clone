@@ -1,0 +1,50 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: chat_clone_db
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+    env_file:
+      - .env
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d chat_clone_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    working_dir: /app/backend
+    volumes:
+      - ./backend:/app/backend:cached
+
+  app:
+    env_file:
+      - .env
+    build:
+      context: .
+      dockerfile: chat-clone-app/Dockerfile
+    stdin_open: true
+    tty: true
+    ports:
+      - "19000:19000"
+      - "19001:19001"
+      - "19002:19002"
+      - "8081:8081"
+    working_dir: /app
+    depends_on:
+      - backend
+
+volumes:
+  db_data: {}
