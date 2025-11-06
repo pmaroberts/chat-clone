@@ -1,6 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// External logout bridge so non-React modules (e.g., API services) can trigger logout
+let externalLogout: null | (() => Promise<void>) = null;
+export function setExternalLogout(fn: () => Promise<void>) { externalLogout = fn; }
+export async function invokeExternalLogout() { if (externalLogout) { await externalLogout(); } }
+
 interface AuthContextType {
   isAuthenticated: boolean;
   token: string | null;
@@ -53,6 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error('Error removing token:', error);
     }
   };
+
+  // Register logout for external callers
+  useEffect(() => {
+    setExternalLogout(logout);
+  }, [logout]);
 
   const value: AuthContextType = {
     isAuthenticated: !!token,

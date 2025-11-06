@@ -1,5 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
+import { invokeExternalLogout } from '@/contexts/AuthContext';
 
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -18,6 +20,37 @@ api.interceptors.request.use(
         return config;
     },
     (error) => {
+        return Promise.reject(error);
+    }
+);
+
+// Global 401 handler: clear token and redirect to login
+let isHandlingAuthError = false;
+
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const status = error?.response?.status;
+        const url: string = error?.config?.url || '';
+
+        const isAuthEndpoint = url.startsWith('/auth/');
+
+        if (status === 401 && !isHandlingAuthError && !isAuthEndpoint) {
+            isHandlingAuthError = true;
+            try {
+                await AsyncStorage.removeItem('authToken');
+                if (typeof invokeExternalLogout === 'function') {
+                    await invokeExternalLogout();
+                }
+            } catch {}
+            finally {
+                try {
+                    router.replace('/login');
+                } catch {}
+                setTimeout(() => { isHandlingAuthError = false; }, 500);
+            }
+        }
+
         return Promise.reject(error);
     }
 );
