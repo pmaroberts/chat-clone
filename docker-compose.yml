@@ -43,6 +43,9 @@ services:
       - "19002:19002"
       - "8081:8081"
     working_dir: /app
+    volumes:
+      - ./chat-clone-app:/app:cached
+      - /app/node_modules
     depends_on:
       - backend
 
