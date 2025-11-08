@@ -4,7 +4,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getMessages, Message } from '@/services/api';
 import { useConversationWebSocket } from '@/hooks/useWebSocket';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { v4 as uuidv4 } from 'uuid';
+import * as Crypto from 'expo-crypto'
+
 
 type OptimisticMessage = Message & {
   tempId?: string;
@@ -155,7 +156,7 @@ export default function ConversationScreen() {
   const handleSend = async () => {
     if (!id || !inputText.trim() || !currentUserId) return;
     const content = inputText.trim();
-    const tempId = uuidv4();
+    const tempId = await Crypto.randomUUID();
     const optimistic: OptimisticMessage = {
       id: tempId,
       tempId,

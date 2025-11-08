@@ -1,5 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const WS_BASE_URL = process.env.EXPO_PUBLIC_WS_URL || 'ws://localhost:8000';
 
@@ -109,16 +109,16 @@ export class WebSocketManager {
   }
 
   sendMessage(
+    messageId: string,
     content: string,
     conversationId: string,
     messageType: string = 'text',
     replyTo?: string,
     metadata?: any
   ): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const messageId = uuidv4();
-      const idempotencyKey = `${messageId}-${Date.now()}`;
+    const idempotencyKey = `${messageId}-${Date.now()}`;
 
+    return new Promise((resolve, reject) => {
       const pendingMsg: PendingMessage = {
         id: messageId,
         content,

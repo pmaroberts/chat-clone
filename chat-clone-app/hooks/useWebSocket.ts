@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { WebSocketManager } from '@/services/websocket';
+import * as Crypto from 'expo-crypto';
 
 export function useConversationWebSocket(conversationId: string | null) {
   const [isConnected, setIsConnected] = useState(false);
@@ -40,7 +41,8 @@ export function useConversationWebSocket(conversationId: string | null) {
       throw new Error('WebSocket not connected');
     }
 
-    return wsManagerRef.current.sendMessage(content, conversationId, messageType, replyTo, metadata);
+    const messageId = await Crypto.randomUUID();
+    return wsManagerRef.current.sendMessage(messageId, content, conversationId, messageType, replyTo, metadata);
   }, [conversationId]);
 
   const sendTyping = useCallback((isTyping: boolean) => {
