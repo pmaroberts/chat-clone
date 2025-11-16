@@ -186,6 +186,13 @@ export default function ConversationScreen() {
     }
   };
 
+  const handleKeyPress = (e: any) => {
+    if (e.nativeEvent.key === 'Enter' && e.nativeEvent.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   // Typing: debounce on input changes
   useEffect(() => {
     if (!id) return;
@@ -283,6 +290,7 @@ export default function ConversationScreen() {
           multiline
           value={inputText}
           onChangeText={setInputText}
+          onKeyPress={handleKeyPress}
         />
         <TouchableOpacity
           style={[styles.sendButton, (!inputText.trim() || sending) && styles.sendButtonDisabled]}

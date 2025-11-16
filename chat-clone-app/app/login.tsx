@@ -233,7 +233,6 @@ export default function LoginScreen() {
               onPress={() => {
                 setIsSignupMode(!isSignupMode);
                 setError('');
-                setPassword('');
               }}
               style={styles.toggleButtonWrapper}
             >
