@@ -1,7 +1,10 @@
-from fastapi import FastAPI, Depends, HTTPException, status, Query, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Depends, HTTPException, status, Query, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, and_
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 from database import get_db
 from models import User, Conversation, ConversationParticipant, Message, MessageReaction, MessageRead
 from schemas import UserCreate, UserResponse, UserLogin, Token, ConversationCreate, ConversationResponse, MessageCreate, MessageResponse, MessageListResponse, MessageReactionCreate
@@ -32,6 +35,10 @@ logger = logging.getLogger(__name__)
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 
 app = FastAPI(title="Chat Clone API")
+
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
@@ -214,7 +221,6 @@ async def handle_send_message(
 ):
     """Handle message sending via WebSocket with idempotency"""
     client_message_id = data.get("message_id")
-    idempotency_key = data.get("idempotency_key")
     content = data.get("content")
     message_type = data.get("message_type", "text")
     reply_to = data.get("reply_to")
@@ -352,11 +358,6 @@ async def handle_send_message(
         }, websocket)        
 
 
-
-
-
-
-
 @app.post("/auth/login", response_model=Token)
 async def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == user_credentials.email).first()
@@ -372,9 +373,16 @@ async def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+async def get_current_user(current_user: User = Depends(verify_token)):
+    return current_user
 
 @app.get("/users", response_model=UserResponse)
-async def get_user(user_id: str, db: Session = Depends(get_db)):
+async def get_user(
+    user_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get user information by user_id. Requires authentication."""
     user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(
@@ -386,9 +394,10 @@ async def get_user(user_id: str, db: Session = Depends(get_db)):
 @app.get("/users/search", response_model=UserResponse)
 async def search_user_by_email(
     email: str = Query(..., description="Email address to search for"),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Search for a user by email address"""
+    """Search for a user by email address. Requires authentication."""
     user = db.query(User).filter(User.email == email).first()
     if not user:
         raise HTTPException(
@@ -398,7 +407,11 @@ async def search_user_by_email(
     return user
 
 @app.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-async def create_user(user: UserCreate, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+async def create_user(request: Request, user: UserCreate, db: Session = Depends(get_db)):
+    """
+    Create a new user account (registration endpoint).
+    """
     existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
         raise HTTPException(
@@ -417,10 +430,6 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     db.refresh(db_user)
 
     return db_user
-
-
-async def get_current_user(current_user: User = Depends(verify_token)):
-    return current_user
 
 @app.post("/conversations", response_model=ConversationResponse, status_code=status.HTTP_201_CREATED)
 async def create_conversation(
