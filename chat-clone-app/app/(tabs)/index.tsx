@@ -24,6 +24,11 @@ export default function ConversationsScreen() {
       const data = await getConversations();
       setConversations(data);
     } catch (err: any) {
+      if (err.response?.status === 403) {
+        await logout();
+        router.replace('/login');
+        return;
+      }
       setError(err.response?.data?.detail || 'Failed to load conversations');
       console.error('Error loading conversations:', err);
     } finally {

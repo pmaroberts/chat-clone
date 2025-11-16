@@ -259,7 +259,7 @@ export default function ConversationScreen() {
           <FlatList
             data={messages}
             inverted
-            keyExtractor={(item) => item.id || item.tempId || uuidv4()}
+            keyExtractor={(item) => item.id || item.tempId || Crypto.randomUUID()}
             renderItem={renderItem}
             contentContainerStyle={styles.listContent}
             onEndReachedThreshold={0.1}
