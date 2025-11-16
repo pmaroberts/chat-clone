@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getMessages, Message } from '@/services/api';
 import { useConversationWebSocket } from '@/hooks/useWebSocket';
@@ -252,7 +252,7 @@ export default function ConversationScreen() {
   }, [currentUserId, readByByMessageId]);
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView style={styles.container} behavior="padding">
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Conversation</Text>
         <Text style={styles.statusText}>
@@ -300,7 +300,7 @@ export default function ConversationScreen() {
           <Text style={styles.sendButtonText}>{sending ? '...' : 'Send'}</Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
