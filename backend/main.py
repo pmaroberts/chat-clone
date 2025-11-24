@@ -193,7 +193,7 @@ async def websocket_endpoint(
                     read_data = {
                         "type": "read", 
                         "message_id": str(message_id),
-                        "user_id": str(user.id),
+                        "reader_id": str(user.id),
                         "read_at": datetime.utcnow().isoformat()
                     }
 
@@ -643,6 +643,15 @@ async def get_messages(
             "created_at": reaction.created_at.isoformat()
         })
 
+    # Load read receipts
+    read_receipts = db.query(MessageRead)\
+        .filter(MessageRead.message_id.in_(message_ids))\
+        .all()
+
+    read_by_by_message = defaultdict(set)
+    for read_receipt in read_receipts:
+        read_by_by_message[read_receipt.message_id].add(str(read_receipt.user_id))
+
     message_responses = [
         MessageResponse(
             id=msg.id,
@@ -655,7 +664,8 @@ async def get_messages(
             edited=msg.edited,
             reply_to=msg.reply_to,
             message_metadata=msg.message_metadata,
-            reactions=reactions_by_message.get(msg.id, [])
+            reactions=reactions_by_message.get(msg.id, []),
+            read_by=list(read_by_by_message.get(msg.id, set()))
         )
         for msg in messages
     ]

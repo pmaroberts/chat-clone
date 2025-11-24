@@ -78,6 +78,7 @@ export interface Message {
   reply_to?: string;
   message_metadata?: any;
   reactions: any[];
+  read_by?: string[];
 }
 
 export interface MessageListResponse {

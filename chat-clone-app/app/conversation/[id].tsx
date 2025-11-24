@@ -131,6 +131,15 @@ export default function ConversationScreen() {
       const response = await getMessages(id, 50);
       const sorted = sortDesc(response.messages);
       setMessages(sorted);
+
+      const initialReadBy: Record<string, Set<string>> = {};
+      sorted.forEach((msg: any) => {
+        if (msg.read_by && Array.isArray(msg.read_by)) {
+          initialReadBy[msg.id] = new Set(msg.read_by);
+        }
+      });
+      setReadByByMessageId(initialReadBy);
+
       setHasMore(!!response.has_more);
       setNextCursor(response.next_cursor);
     } catch (error) {
@@ -210,6 +219,7 @@ export default function ConversationScreen() {
   }), []);
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+    console.log(currentUserId)
     if (!currentUserId) return;
     // Send read receipts for visible messages from others
     viewableItems.forEach((vi: any) => {
@@ -218,6 +228,7 @@ export default function ConversationScreen() {
       const isFromOther = msg.sender_id && msg.sender_id !== currentUserId;
       if (!isFromOther) return;
       if (!sentReadReceiptForRef.current.has(msg.id)) {
+        console.log("sending read receipt")
         sendReadReceipt(msg.id);
         sentReadReceiptForRef.current.add(msg.id);
       }

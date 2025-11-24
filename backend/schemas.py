@@ -64,6 +64,7 @@ class MessageResponse(BaseModel):
     reply_to: Optional[UUID] = None
     message_metadata: Optional[Dict[str, Any]] = None
     reactions: List[Dict[str, Any]] = []  # Will be populated via join
+    read_by: List[str] = [] # List of user IDs who are read this message
     
     class Config:
         from_attributes = True
