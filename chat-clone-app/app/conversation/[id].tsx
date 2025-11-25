@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView } from 'react-native';
+import { Platform, StyleSheet, View, Text, FlatList, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getMessages, Message } from '@/services/api';
 import { useConversationWebSocket } from '@/hooks/useWebSocket';
